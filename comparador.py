@@ -84,6 +84,17 @@ def compare_dataframes(df1, df2):
             st.write("### Diferencias entre los archivos")
             st.dataframe(differences.drop(columns=['_merge']))
 
+        only_in_process = df1[~df1.apply(tuple, axis=1).isin(df2.apply(tuple, axis=1))]
+        only_in_control = df2[~df2.apply(tuple, axis=1).isin(df1.apply(tuple, axis=1))]
+
+        with st.expander("Ver filas solo en Archivo del Proceso"):
+            st.write("### Filas solo en el Archivo del Proceso")
+            st.dataframe(only_in_process)
+
+        with st.expander("Ver filas solo en Archivo de Control"):
+            st.write("### Filas solo en el Archivo de Control")
+            st.dataframe(only_in_control)
+
 def main():
     st.title('Comparador de Archivos')
     
@@ -109,7 +120,7 @@ def main():
         delimiter2 = st.selectbox("Selecciona el delimitador para el Archivo de Control", 
                                   options=[',', '|', ';', '\t'], index=0, key='delim2')
         encoding2 = st.selectbox("Selecciona la codificación para el Archivo de Control",
-                                 options=['utf-8', 'latin-1'], index=0, key='enc2')
+                                 options=['utf-8', 'latin-1', 'cp1252'], index=0, key='enc2')
         
         if file2 is not None:
             df2_preview = load_data_with_progress(file2, delimiter2, encoding2)
