@@ -1,20 +1,16 @@
 import streamlit as st
 import pandas as pd
 
-# Función para leer el archivo y actualizar la barra de progreso
 def load_data_with_progress(uploaded_file, delimiter, encoding):
     if uploaded_file is not None:
         if uploaded_file.name.endswith(('.csv', '.txt')):
             try:
-                with st.spinner('Cargando archivo...'):  # Aquí se muestra el spinner
-                    # Tamaño del archivo en bytes
+                with st.spinner('Cargando archivo...'):
                     file_size = uploaded_file.size
                     
-                    # Crear una barra de progreso
                     progress_bar = st.progress(0)
                     df = pd.DataFrame()
                     
-                    # Leer el archivo en partes y actualizar la barra de progreso
                     for i, chunk in enumerate(pd.read_csv(uploaded_file, delimiter=delimiter, encoding=encoding, chunksize=1000)):
                         df = pd.concat([df, chunk])
                         progress = min((i + 1) * chunk.memory_usage(deep=True).sum() / file_size, 1.0)
@@ -27,11 +23,9 @@ def load_data_with_progress(uploaded_file, delimiter, encoding):
             st.error("Formato de archivo no soportado. Por favor, carga un archivo CSV o TXT.")
     return None
 
-# Función principal de la aplicación
 def main():
     st.title('Comparador de Archivos')
     
-    # Crear columnas para los cargadores de archivo
     col1, col2 = st.columns(2)
     
     with col1:
@@ -50,16 +44,13 @@ def main():
     
     if st.button("Comparar archivos"):
         if file1 is not None and file2 is not None:
-            # Cargar los dataframes
             df1 = load_data_with_progress(file1, delimiter1, encoding1)
             df2 = load_data_with_progress(file2, delimiter2, encoding2)
             
             if df1 is not None and df2 is not None:
-                # Comparar dataframes
                 compare_dataframes(df1, df2)
         else:
             st.error("Por favor, carga ambos archivos para proceder con la comparación.")
 
-# Llamar a la función principal
 if __name__ == "__main__":
     main()
