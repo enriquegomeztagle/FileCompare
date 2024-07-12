@@ -47,12 +47,16 @@ def compare_dataframes(df1, df2):
     with col1:
         st.write("### Archivo del Proceso")
         st.write(f"Longitud del DataFrame: {len(df1)}")
-        st.write("Columnas:", df1.columns.tolist())
+        st.write(f"Número de columnas: {len(df1.columns)}")
+        with st.expander("Ver columnas del Archivo del Proceso"):
+            st.write(df1.columns.tolist())
     
     with col2:
         st.write("### Archivo de Control")
         st.write(f"Longitud del DataFrame: {len(df2)}")
-        st.write("Columnas:", df2.columns.tolist())
+        st.write(f"Número de columnas: {len(df2.columns)}")
+        with st.expander("Ver columnas del Archivo de Control"):
+            st.write(df2.columns.tolist())
 
     if df1.equals(df2):
         st.success("Los archivos son idénticos!")
@@ -62,6 +66,24 @@ def compare_dataframes(df1, df2):
                     Te faltan [{len(df2) - len(df1)}] filas.\n
                     Te faltan [{len(df2.columns) - len(df1.columns)}] columnas.
                     """)
+
+        common_rows = df1[df1.apply(tuple, axis=1).isin(df2.apply(tuple, axis=1))]
+        
+        with st.expander("Ver filas comunes"):
+            st.write("### Filas comunes en ambos archivos")
+            st.dataframe(common_rows)
+
+        differences = df1.merge(df2, indicator=True, how='outer')
+
+        differences['APARECE EN'] = differences['_merge'].map({'left_only': 'Archivo del Proceso', 
+                                                           'right_only': 'Archivo de Control', 
+                                                           'both': 'Ambos'})
+        differences = differences[differences['_merge'] != 'both']
+
+        with st.expander("Ver diferencias"):
+            st.write("### Diferencias entre los archivos")
+            st.dataframe(differences.drop(columns=['_merge']))
+
 def main():
     st.title('Comparador de Archivos')
     
