@@ -3,10 +3,13 @@ import pandas as pd
 
 def load_data(uploaded_file, delimiter, encoding):
     if uploaded_file is not None:
-        try:
-            return pd.read_csv(uploaded_file, delimiter=delimiter, encoding=encoding)
-        except Exception as e:
-            st.error(f"Error al procesar el archivo: {e}")
+        if uploaded_file.name.endswith(('.csv', '.txt')):
+            try:
+                return pd.read_csv(uploaded_file, delimiter=delimiter, encoding=encoding)
+            except Exception as e:
+                st.error(f"Error al procesar el archivo: {e}")
+        else:
+            st.error("Formato de archivo no soportado. Por favor, carga un archivo CSV o TXT.")
     return None
 
 
