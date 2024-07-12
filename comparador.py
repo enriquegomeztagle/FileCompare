@@ -14,19 +14,18 @@ def load_data(uploaded_file, delimiter, encoding):
 
 
 def compare_dataframes(df1, df2):
-    col1, col2 = st.columns(2)  # Crear dos columnas
+    col1, col2 = st.columns(2)
     
-    with col1:  # Información del Primer DataFrame en la primera columna
+    with col1:
         st.write("### Primer DataFrame")
         st.write(f"Longitud del DataFrame: {len(df1)}")
         st.write("Columnas:", df1.columns.tolist())
     
-    with col2:  # Información del Segundo DataFrame en la segunda columna
+    with col2:
         st.write("### Segundo DataFrame")
         st.write(f"Longitud del DataFrame: {len(df2)}")
         st.write("Columnas:", df2.columns.tolist())
 
-    # Comparar si las filas son exactamente iguales
     if df1.equals(df2):
         st.success("Los archivos son idénticos!")
     else:
@@ -35,7 +34,6 @@ def compare_dataframes(df1, df2):
 def main():
     st.title('Comparador de Archivos')
     
-    # Crear columnas para los cargadores de archivo
     col1, col2 = st.columns(2)
     
     with col1:
@@ -54,12 +52,10 @@ def main():
     
     if st.button("Comparar archivos"):
         if file1 is not None and file2 is not None:
-            # Cargar los dataframes
             df1 = load_data(file1, delimiter1, encoding1)
             df2 = load_data(file2, delimiter2, encoding2)
             
             if df1 is not None and df2 is not None:
-                # Comparar dataframes
                 compare_dataframes(df1, df2)
         else:
             st.error("Por favor, carga ambos archivos para proceder con la comparación.")
