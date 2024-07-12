@@ -1,37 +1,33 @@
 import streamlit as st
 import pandas as pd
 
-def load_data(uploaded_file, delimiter, encoding):
+# Función para leer el archivo y actualizar la barra de progreso
+def load_data_with_progress(uploaded_file, delimiter, encoding):
     if uploaded_file is not None:
         if uploaded_file.name.endswith(('.csv', '.txt')):
             try:
-                return pd.read_csv(uploaded_file, delimiter=delimiter, encoding=encoding)
+                with st.spinner('Cargando archivo...'):  # Aquí se muestra el spinner
+                    # Tamaño del archivo en bytes
+                    file_size = uploaded_file.size
+                    
+                    # Crear una barra de progreso
+                    progress_bar = st.progress(0)
+                    df = pd.DataFrame()
+                    
+                    # Leer el archivo en partes y actualizar la barra de progreso
+                    for i, chunk in enumerate(pd.read_csv(uploaded_file, delimiter=delimiter, encoding=encoding, chunksize=1000)):
+                        df = pd.concat([df, chunk])
+                        progress = min((i + 1) * chunk.memory_usage(deep=True).sum() / file_size, 1.0)
+                        progress_bar.progress(progress)
+                    
+                    return df
             except Exception as e:
                 st.error(f"Error al procesar el archivo: {e}")
         else:
             st.error("Formato de archivo no soportado. Por favor, carga un archivo CSV o TXT.")
     return None
 
-
-def compare_dataframes(df1, df2):
-    col1, col2 = st.columns(2)  # Crear dos columnas
-    
-    with col1:  # Información del Primer DataFrame en la primera columna
-        st.write("### Primer DataFrame")
-        st.write(f"Longitud del DataFrame: {len(df1)}")
-        st.write("Columnas:", df1.columns.tolist())
-    
-    with col2:  # Información del Segundo DataFrame en la segunda columna
-        st.write("### Segundo DataFrame")
-        st.write(f"Longitud del DataFrame: {len(df2)}")
-        st.write("Columnas:", df2.columns.tolist())
-
-    # Comparar si las filas son exactamente iguales
-    if df1.equals(df2):
-        st.success("Los archivos son idénticos!")
-    else:
-        st.warning("Los archivos tienen diferencias.")
-
+# Función principal de la aplicación
 def main():
     st.title('Comparador de Archivos')
     
@@ -55,8 +51,8 @@ def main():
     if st.button("Comparar archivos"):
         if file1 is not None and file2 is not None:
             # Cargar los dataframes
-            df1 = load_data(file1, delimiter1, encoding1)
-            df2 = load_data(file2, delimiter2, encoding2)
+            df1 = load_data_with_progress(file1, delimiter1, encoding1)
+            df2 = load_data_with_progress(file2, delimiter2, encoding2)
             
             if df1 is not None and df2 is not None:
                 # Comparar dataframes
@@ -64,5 +60,6 @@ def main():
         else:
             st.error("Por favor, carga ambos archivos para proceder con la comparación.")
 
+# Llamar a la función principal
 if __name__ == "__main__":
     main()
